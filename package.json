@@ -15,7 +15,6 @@
   "bin": {
     "ts-boilerplate": "./bin/ts-boilerplate"
   },
-  "main": "index.js",
   "author": "TheSmiths[Matthias Benkort]",
   "license": "Apache",
   "dependencies": {

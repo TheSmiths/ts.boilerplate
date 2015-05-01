@@ -2,12 +2,10 @@
 
 var gulp = require('gulp'),
     utils = require('gulp-util'),
-    git = require('gulp-git'),
     _ = require('underscore'),
     pkginfo = require('pkginfo'),
     commander = require('commander'),
     prompt = require('prompt'),
-    exec = require('child_process').exec,
     path = require('path'),
     fs = require('fs'),
     async = require('async');
@@ -101,6 +99,7 @@ function proceedInit(options) {
     options.processRoot = process.cwd();
 
     var tasks = {
+        masterBranch: require('./tasks/masterBranch.js')(options),
         testBranch: require('./tasks/testBranch.js')(options),
         project: require('./tasks/project.js')(options)
     };
@@ -115,13 +114,14 @@ function proceedInit(options) {
 
             async.series(
                 [
-                    git.init,
+                    tasks.masterBranch.init,
                     tasks.testBranch.create,
                     tasks.project.populate,
-                    tasks.testBranch.commit,
+                    tasks.testBranch.addAndCommit,
+                    tasks.masterBranch.checkout,
                 ], function (err) {
                     if (err) { return handleError(err); }
-                    console.log("Ok done.");
+                    utils.log(utils.colors.bold.cyan("Sounds like you're ready to start :)"));
                 }
             );
             break;

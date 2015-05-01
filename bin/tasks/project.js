@@ -14,6 +14,7 @@ module.exports = function (options) {
                 specDir: path.join(options.root, 'project_files', 'spec'),
                 gulpDir: path.join(options.root, 'project_files', '.gulp'),
                 gulpfile: path.join(options.root, 'project_files', 'gulpfile.js'),
+                gitignore: path.join(options.root, 'project_files', '.gitignore'),
                 packagejson: path.join(options.root, 'project_files', 'package.json')};
 
         async.parallel([
@@ -26,6 +27,11 @@ module.exports = function (options) {
                 /* Prepare a widgets folder */
                 utils.log("Adding a 'widgets' folder to the Alloy project.");
                 exec("mkdir " + path.join(options.projectDir, 'app', 'widgets'), done);
+            },
+            function (done) {
+                /* Adding gitignore */
+                utils.log("Adding .gitignore");
+                exec("cp -r " + cpDirs.gitignore + " " + options.projectDir, done);
             },
             function (done) {
                 /* Copy initial template for spec */
