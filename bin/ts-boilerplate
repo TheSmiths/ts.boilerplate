@@ -91,102 +91,40 @@ function init (env) {
 }
 
 function proceedInit(options) {
-    options.type =  types.hasOwnProperty(options.type) && types[options.type] || options.type;
-   
     /* Ensure there is no repo */
     if (fs.readdirSync(process.cwd()).length > 0) { 
         return handleError("Not a valid init folder; Please, select an empty folder."); 
     }
 
-    /* TODO modules not ready */
-    if (options.type === 'module') { 
-        return handleError("Module not implemented yet. Sorry :/");
-    }
+    options.type =  types.hasOwnProperty(options.type) && types[options.type] || options.type;
+    options.root = path.join(__dirname, '..');
+    options.processRoot = process.cwd();
 
-    /* Initialize the repo */
-    var initRepo = git.init;        
-
-    /* Create a test branch */
-    var createTestBranch = function (callback) {
-        git.checkout('test', {args: '-b'}, function (err) {
-            if (err) { return callback(err); }
-            var ticreateOptions = [
-                    "-t app",
-                    "-n " + options.name + "-test",
-                    "-p all",
-                    "-d " + path.join(process.cwd(), 'test'),
-                    "--id test." + options.name,
-                    "--no-prompt",
-                    "--log-level warn"],
-                alloynewOptions = [
-                    "-l ERROR",
-                    path.join(process.cwd(), 'test', options.name + "-test")];
-
-            /* Create a test app */
-            utils.log("Creating Titanium & Alloy test project");
-            exec("mkdir test && ti create " + ticreateOptions.join(" "), function () {
-                exec("alloy new " + alloynewOptions.join(" "), function (err) {
-                    if (err) { return callback(err); }
-                    
-                    /* Dir from and to which we copy templates*/
-                    var cpDirs = {
-                        projectDir: alloynewOptions[1],
-                        specDir: path.join(__dirname, '..', 'spec'),
-                        gulpDir: path.join(__dirname, '..', 'task_runner', 'test', '.gulp'),
-                        gulpTest: path.join(__dirname, '..', 'task_runner', 'test', 'gulpfile.js'),
-                        gulpfile: path.join(__dirname, '..', 'task_runner', options.type, 'gulpfile.js'),
-                        packagejson: path.join(__dirname, '..', 'dependencies', 'package.json'),
-                    };
-                    async.parallel([
-                        function (done) {
-                            /* Prepare a lib folder */
-                            exec("mkdir " + path.join(cpDirs.projectDir, 'app', 'lib'), function () {
-                                exec("mkdir " + path.join(cpDirs.projectDir, 'app', 'widgets'), done);
-                            });
-                        },
-                        function (done) {
-                            /* Copy initial template for spec */
-                            utils.log("Adding a 'spec' folder to the app. #JasmineWithTiShadow");
-                            exec("cp -r " + cpDirs.specDir + " " + cpDirs.projectDir, done);
-                        },
-                        function (done) {
-                            /* Copy all task runner stuff */
-                            utils.log("Adding task runner to the test app. #Gulp");
-                            exec("cp " + cpDirs.gulpfile + " " + process.cwd());
-                            exec("cp " + cpDirs.gulpTest + " " + cpDirs.projectDir);
-                            exec("cp -r " + cpDirs.gulpDir + " " + cpDirs.projectDir, done);
-                        }, function (done) {
-                            /* Copy package.json to handle task runner dependencies */
-                            utils.log("Copying package.json to handle task runner dependencies");
-                            exec("cp " + cpDirs.packagejson + " " + cpDirs.projectDir, done);
-                        }], function (err) {
-                            if (err) { return callback(err); }
-                            /* Install dependencies */
-                            utils.log("Install dependencies");
-                            exec("npm install gulp", function (err) {
-                                if (err) { return callback(err); }
-
-                                process.chdir(cpDirs.projectDir);
-                                exec("npm install", function(err) {
-                                    process.chdir(path.join('..', '..'));
-                                    callback(err);
-                                });
-                            });
-                        }
-                    );
-                });
-            });
-        });
+    var tasks = {
+        testBranch: require('./tasks/testBranch.js')(options),
+        project: require('./tasks/project.js')(options)
     };
 
-    async.series(
-        [   
-            initRepo,
-            createTestBranch,
-            commitTestBranch,
-        ],function (err) {
-          if (err) { return handleError(err); }
-          console.log("Ok done.");
-        }
-    );
+    switch (options.type) {
+        case 'library':
+        case 'widget':
+            options.projectDir = path.join(process.cwd(), 'test', options.name + "-test");
+            options.projectName = options.name + "-test";
+            options.projectRoot = path.join(process.cwd(), 'test');
+            options.projectId = 'test.' + options.name;
+
+            async.series(
+                [
+                    git.init,
+                    tasks.testBranch.create,
+                    tasks.project.populate,
+                    tasks.testBranch.commit,
+                ], function (err) {
+                    if (err) { return handleError(err); }
+                    console.log("Ok done.");
+                }
+            );
+            break;
+        default: handleError("Module not implemented yet. Sorry :/");
+    }
 }
