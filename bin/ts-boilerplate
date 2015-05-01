@@ -1,0 +1,48 @@
+#!/usr/bin/env node
+
+var gulp = require('gulp'),
+    utils = require('gulp-util'),
+    git = require('gulp-git'),
+    _ = require('underscore'),
+    pkginfo = require('pkginfo'),
+    commander = require('commander'),
+    prompt = require('prompt'),
+    exec = require('child_process').exec,
+    path = require('path'),
+    fs = require('fs'),
+    async = require('async');
+
+pkginfo(module, 'name', 'version', 'description');
+prompt.message = prompt.delimiter = "";
+
+commander
+    .version(module.exports.version)
+    .description(module.exports.description);
+
+/* ****** init command ****** */
+var types = {1:'library', 2:'widget', 3:'module'},
+    reTypes = new RegExp("^(" + _.flatten(_.pairs(types)).join('|') + ")$"),
+    reName = /^[\w\.-]+$/;
+
+commander
+    .command('init')
+    .description('Initialize a repository, test env and general structure for a component\'s dev.')
+    .option('-t, --type [type]', 'Type of the component', reTypes)
+    .option('-n, --name [name]', 'Name of the component', reName)
+    .action(init)
+    .on('--help', helpInit);
+
+commander.parse(process.argv);
+
+function handleError (err) {
+    console.log(utils.colors.red("Error: " + (err.message || err)));
+    process.exit(1);
+}
+
+function helpInit () {
+    console.log("  Examples:"
+    );
+}
+
+function init (env) {
+}
