@@ -100,7 +100,7 @@ dist/
 *.class
 
 # Generated files
-bin/
+# bin/
 gen/
 
 # Gradle files
@@ -200,6 +200,7 @@ target/
 
 ### Ruby ###
 *.gem
+!component_files/jsduck*.gem
 *.rbc
 /.config
 /coverage/

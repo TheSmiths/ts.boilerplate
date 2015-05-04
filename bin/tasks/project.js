@@ -21,12 +21,26 @@ module.exports = function (options) {
             function (done) {
                 /* Prepare a lib folder */
                 utils.log("Adding a 'lib' folder to the Alloy project.");
-                exec("mkdir " + path.join(options.projectDir, 'app', 'lib'), done);
+                var libPath = path.join(options.projectDir, 'app', 'lib'),
+                    readme = "Put your libraries here.";
+                exec("mkdir " + libPath, function () {
+                    fs.writeFile(path.join(libPath, 'README'), readme, done);
+                });
             },
             function (done) {
                 /* Prepare a widgets folder */
                 utils.log("Adding a 'widgets' folder to the Alloy project.");
-                exec("mkdir " + path.join(options.projectDir, 'app', 'widgets'), done);
+                var widPath = path.join(options.projectDir, 'app', 'widgets'),
+                    readme = "Put your widgets here.";
+                exec("mkdir " + widPath, function () {
+                    fs.writeFile(path.join(widPath, 'README'), readme, done);
+                });
+            },
+            function (done) {
+                /* Add a readme in the models folder, avoid empty folder for git  */
+                var modelPath = path.join(options.projectDir, 'app', 'models'),
+                    readme = "Put your models here.";
+                fs.writeFile(path.join(modelPath, 'README'), readme, done);
             },
             function (done) {
                 /* Adding gitignore */

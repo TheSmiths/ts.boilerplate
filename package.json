@@ -21,7 +21,7 @@
     "async": "^0.9.0",
     "commander": "^2.8.1",
     "gulp": "^3.8.11",
-    "gulp-git": "^1.2.1",
+    "gulp-git": "git://github.com/ktorz/gulp-git.git",
     "gulp-util": "^3.0.4",
     "pkginfo": "^0.3.0",
     "prompt": "^0.2.14",

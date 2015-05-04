@@ -36,16 +36,6 @@ module.exports = function (options) {
         },
 
         /* Checkout the master branch */
-        checkout: function (callback) {
-            git.checkout('master', function(err) {
-                if (err) { return callback(err); }
-
-                if (fs.readdirSync(options.processRoot).indexOf('test') === -1) {
-                    callback();
-                } else {
-                    exec("rm -r test node_modules", callback);
-                }
-            }); 
-        }
+        checkout: function (callback) { git.checkout('master', callback); }
     };
 };
