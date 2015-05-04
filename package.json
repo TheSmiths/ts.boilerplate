@@ -2,9 +2,6 @@
   "name": "ts-boilerplate",
   "version": "0.1.0",
   "description": "Quickly set up bases and tools needed for a good Titanium app dev",
-  "scripts": {
-    "test": "gulp test"
-  },
   "keywords": [
     "Titanium",
     "Alloy",

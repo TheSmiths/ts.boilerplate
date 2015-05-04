@@ -34,8 +34,11 @@ module.exports = function (gulp, plugins) {
                 done();
             });
 
-            var tag = [plugins.moment().format("YYYY-MM-DD"), 
-                process.env.TRAVIS_COMMIT, process.env.PLATFORM].join('/'); 
+            var tag = [
+                plugins.moment().format("YYYY-MM-DD"), 
+                plugins.path.basename(process.cwd()),
+                process.env.TRAVIS_COMMIT, 
+                process.env.PLATFORM].join('/'); 
 
             plugins._.each(screenshots, function (screenshot) {
                 plugins.cloudinary.uploader.upload(plugins.path.join(screenshotsPath, screenshot), function(result) {

@@ -2,9 +2,12 @@ var gulp = require('gulp'),
     exec = require('child_process').exec;
 
 /* Generate documentation of the component */
-gulp.task('default', ['doc']);
+gulp.task('default', function () {
+    console.log("Usage : \n"+
+        "  \033[1;33mgulp doc\033[0m      --  Generate the documentation\n\n"+
+        "  \033[1;33mgulp publish\033[0m  --  Publish the documentation on the gh-pages"); 
+});
 gulp.task('doc', function (done) {
-    //var filesStream = gulp.src('!(node_modules|gulpfile|*.!(js))'),
     var filesStream = gulp.src(['*.js', '!gulpfile.js', './!(node_modules|documentation|*.*)']),
         files = [];
 
@@ -20,4 +23,9 @@ gulp.task('doc', function (done) {
             done();
         });
     });
+});
+
+
+gulp.task('publish', function (done) {
+    exec('git subtree push -P documentation origin gh-pages', done);
 });

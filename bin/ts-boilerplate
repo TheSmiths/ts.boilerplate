@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+/* Require requested modules */
 var gulp = require('gulp'),
     utils = require('gulp-util'),
     _ = require('underscore'),
@@ -10,38 +11,52 @@ var gulp = require('gulp'),
     fs = require('fs'),
     async = require('async');
 
+/* Extract data from the package.json */
 pkginfo(module, 'name', 'version', 'description');
+
+/* Remove the ugly prefix from the prompter */
 prompt.message = prompt.delimiter = "";
 
+/* Add some meta-data to the CLI */
 commander
     .version(module.exports.version)
     .description(module.exports.description);
 
-/* ****** init command ****** */
-var types = {1:'library', 2:'widget', 3:'module'},
+/* The module might be able to bootstrap lbirary, modules and widget. Let's declare those names */
+var types = {1:'library', 2:'widget', 3:'module', 4:'project'},
     reTypes = new RegExp("^(" + _.flatten(_.pairs(types)).join('|') + ")$"),
     reName = /^[\w\.-]+$/;
 
+/* Add the first (and only ?) command which bootstrap a component */
 commander
     .command('init')
     .description('Initialize a repository, test env and general structure for a component\'s dev.')
     .option('-t, --type [type]', 'Type of the component', reTypes)
     .option('-n, --name [name]', 'Name of the component', reName)
     .action(init)
-    .on('--help', helpInit);
+    .on('--help', helpInit); /* Add a custom help for the init command */
 
-commander.parse(process.argv);
+commander.parse(process.argv); /* At the end, parse the command */
 
+/* Very basic error handler */
 function handleError (err) {
     console.log(utils.colors.red("Error: " + (err.message || err)));
     process.exit(1);
 }
 
+
+/* ********** INIT ********** */
+
+/* Display a custom help */
 function helpInit () {
-    console.log("  Examples:"
+    console.log("  Examples: \n"+
+        "    ts-boilerplate init --name myLibrary --type library\n"+
+        "    ts-boilerplate init -n myWidget --type 2\n"+
+        "    ts-boiletplate init"
     );
 }
 
+/* Handle the init command : i.e. Retrieve some info from the user, and check them */
 function init (env) {
     var options = {
             type: env.type,
@@ -58,6 +73,7 @@ function init (env) {
 
     prompt.start();
 
+    /* Ask for the type and ensure it */
     var checkType = function (callback) {
         if (options.type !== undefined && options.type.match(reTypes)) { return callback(); }
         console.log(utils.colors.white.bold("What type of component would you like to create?\n")+
@@ -72,6 +88,7 @@ function init (env) {
         });
     }; 
 
+    /* Ask for the name and ensure it */
     var checkName = function (callback) {
         if (typeof options.name === "string" && options.name.match(reName)) { return callback(); }
 
@@ -82,8 +99,11 @@ function init (env) {
         });
     }
 
+    /* The prompt make non-blocking calls, so, let's run them one after another */
     async.series([checkType, checkName], function (err) { 
         if (err) { return handleError(err); }
+
+        /* All arguments have been stored into options, let's proceed */
         proceedInit(options); 
     });
 }
@@ -94,10 +114,12 @@ function proceedInit(options) {
         return handleError("Not a valid init folder; Please, select an empty folder."); 
     }
 
+    /* Add some info that may be used by workers / tasks handlers */
     options.type =  types.hasOwnProperty(options.type) && types[options.type] || options.type;
     options.root = path.join(__dirname, '..');
     options.processRoot = process.cwd();
 
+    /* All the works have been splitted out into smaller workers for clarity */
     var tasks = {
         masterBranch:   require('./tasks/masterBranch.js')(options),
         testBranch:     require('./tasks/testBranch.js')(options),
@@ -106,17 +128,22 @@ function proceedInit(options) {
     };
 
     switch (options.type) {
+        /* Behavior is the same for library and widget */
         case 'library':
         case 'widget':
-            options.projectDir = path.join(process.cwd(), 'test', options.name + "-test");
+            /* We'll have to create a test project, so, let's add some information required by the
+             * project worker */
             options.projectName = options.name + "-test";
+            options.projectDir = path.join(process.cwd(), 'test', options.projectName);
             options.projectRoot = path.join(process.cwd(), 'test');
             options.projectId = 'test.' + options.name;
 
+            /* Use async to run tasks one after another */
             async.series(
                 [
                     tasks.masterBranch.init,
                     tasks.testBranch.create,
+                    tasks.project.create,
                     tasks.project.populate,
                     tasks.testBranch.addAndCommit,
                     tasks.masterBranch.checkout,
@@ -129,6 +156,27 @@ function proceedInit(options) {
                 }
             );
             break;
+        case 'project':
+            options.projectName = options.name;
+            options.projectDir = path.join(process.cwd(), options.projectName);
+            options.projectRoot = process.cwd();
+            options.projectId = 'app.' + options.name;
+
+            /* Use async to run tasks one after another */
+            async.series(
+                [
+                    tasks.masterBranch.init,
+                    tasks.project.create,
+                    tasks.project.populate,
+                    tasks.masterBranch.addAndCommit,
+                ], function (err) {
+                    if (err) { return handleError(err); }
+                    utils.log(utils.colors.bold.cyan("Sounds like you're ready to start :)"));
+                }
+            );
+            break;
+
+        /* For the moment, we don't mind about module */
         default: handleError("Module not implemented yet. Sorry :/");
     }
 }
