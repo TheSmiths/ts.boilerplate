@@ -1,6 +1,6 @@
 {
   "name": "ts-boilerplate",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "description": "Quickly set up bases and tools needed for a good Titanium app dev",
   "keywords": [
     "Titanium",
@@ -23,5 +23,17 @@
     "pkginfo": "^0.3.0",
     "prompt": "^0.2.14",
     "underscore": "^1.8.3"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thesmiths/ts.boilerplate"
+  },
+  "bugs": {
+    "url": "https://github.com/thesmiths/ts.boilerplate/issues"
+  },
+  "homepage": "https://github.com/thesmiths/ts.boilerplate"
 }
