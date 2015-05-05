@@ -49,7 +49,7 @@ function handleError (err) {
 
 /* Display a custom help */
 function helpInit () {
-    console.log("  Examples: \n"+
+    console.log("  Examples: \n\n"+
         "    ts-boilerplate init --name myLibrary --type library\n"+
         "    ts-boilerplate init -n myWidget --type 2\n"+
         "    ts-boiletplate init"
