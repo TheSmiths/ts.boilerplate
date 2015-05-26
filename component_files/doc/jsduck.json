@@ -8,6 +8,7 @@
     "--foreign-types": [
         "underscore     ~>  http://underscorejs.org/#",
         "backbone       ~>  http://backbonejs.org/#",
-        "appcelerator   ~>  http://docs.appcelerator.com/titanium/3.0/#!/api/"
+        "appcelerator   ~>  http://docs.appcelerator.com/titanium/3.0/#!/api/",
+        "thesmiths      ~>  https://thesmiths-widgets.github.io/"
     ]
 }

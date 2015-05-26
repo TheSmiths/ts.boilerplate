@@ -6,6 +6,10 @@ module.exports = function (options) {
         gitUtils = require('../utils/git-utils.js');
 
     return {
+        init: function (callback) {
+            git.init(callback);
+        },
+
         /* Create a test branch */
         create: function (callback) {
             git.checkout('test', {args: '-b'}, callback);
@@ -14,13 +18,7 @@ module.exports = function (options) {
         setup: function (callback) {
             exec("rm " + path.join(options.projectDir, "README"), function () {
                 exec("mv " + path.join(options.projectDir, "*") + " ./", function () {
-                    exec("rm -r " + options.projectDir, function () {
-                        var subPath = path.join(
-                            'app', 
-                            options.type === 'widget' ? 'widgets' : 'lib', 
-                            options.name);
-                        git.addSubmodule("./", subPath, {args: "-b master --name " + options.name}, callback);
-                    });
+                    exec("rm -r " + options.projectDir, callback);
                 });
             });
         },
@@ -32,6 +30,11 @@ module.exports = function (options) {
                 files = ['.'],
                 addOptions = '--all';
                 gitUtils.addAndCommit(files, msg, addOptions, callback);
-        }
+        },
+
+        exportAsSubtree: function (callback) {
+            var subdir = path.join('app', options.type === 'widget' ? 'widgets' : 'lib', options.name);
+            git.exec({args: 'subtree split -b master -P ' + subdir + ' test'}, callback);
+        },
     };
 };

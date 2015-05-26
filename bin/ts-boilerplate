@@ -141,12 +141,13 @@ function proceedInit(options) {
             /* Use async to run tasks one after another */
             async.series(
                 [
-                    tasks.masterBranch.init,
+                    tasks.testBranch.init,
                     tasks.testBranch.create,
                     tasks.project.create,
                     tasks.project.populate,
                     tasks.testBranch.setup,
                     tasks.testBranch.addAndCommit,
+                    tasks.testBranch.exportAsSubtree,
                     tasks.masterBranch.checkout,
                     tasks.docBranch.create, 
                     tasks.docBranch.addAndCommit,
