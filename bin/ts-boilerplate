@@ -134,8 +134,8 @@ function proceedInit(options) {
             /* We'll have to create a test project, so, let's add some information required by the
              * project worker */
             options.projectName = options.name + "-test";
-            options.projectDir = path.join(process.cwd(), 'test', options.projectName);
-            options.projectRoot = path.join(process.cwd(), 'test');
+            options.projectDir = path.join(process.cwd(), options.projectName);
+            options.projectRoot = process.cwd();
             options.projectId = 'test.' + options.name;
 
             /* Use async to run tasks one after another */
@@ -145,6 +145,7 @@ function proceedInit(options) {
                     tasks.testBranch.create,
                     tasks.project.create,
                     tasks.project.populate,
+                    tasks.testBranch.setup,
                     tasks.testBranch.addAndCommit,
                     tasks.masterBranch.checkout,
                     tasks.docBranch.create, 

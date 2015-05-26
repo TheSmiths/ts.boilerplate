@@ -86,7 +86,7 @@ module.exports = function (options) {
             function (done) {
                 /* Copy initial template for i18n, feature and specs */
                 utils.log("Adding 'i18n', 'spec' and 'features' folders to the app.");
-                exec("cp -r " + [cpDirs.i18nDir, cpDirs.spec, cpDirs.feat, options.projectDir].join(" "), done);
+                exec("cp -r " + [cpDirs.i18nDir, cpDirs.specDir, cpDirs.featDir, options.projectDir].join(" "), done);
             },
             function (done) {
                 /* Copy all task runner stuff */
