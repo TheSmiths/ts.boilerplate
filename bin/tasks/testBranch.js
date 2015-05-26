@@ -18,7 +18,12 @@ module.exports = function (options) {
         setup: function (callback) {
             exec("rm " + path.join(options.projectDir, "README"), function () {
                 exec("mv " + path.join(options.projectDir, "*") + " ./", function () {
-                    exec("rm -r " + options.projectDir, callback);
+                    var gitignore = path.join(options.projectDir, ".gitignore"),
+                        travis = path.join(options.projectDir, ".travis.yml"),
+                        gulp = path.join(options.projectDir, ".gulp");
+                    exec("mv " + [gitignore, travis, gulp, "./"].join(" "), function () {
+                        exec("rm -r " + options.projectDir, callback);
+                    });
                 });
             });
         },
