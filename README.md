@@ -23,7 +23,7 @@ applications. There are two versions of calabash: calabash-android and calabash-
 straightforward). Both version are APIs to interact with emulators, simulators or real devices.
 Also, it relies on [Cucumber](https://cukes.info/) in order to offer an easy-to-read and
 easy-to-write behavior syntax.  Finally, we are using our forked version of
-[TiCalabash](https://github.com/ktorz/ticalabash) which allow developers to write behaviors that
+[TiCalabash](https://github.com/ktorz/ticalabash/tree/i18n) which allow developers to write behaviors that
 supports internationalisation. Thus, it is possible to write test templates for every languages
 using string references of the app. Here is a sample of what test scenarios look like :
 
