@@ -29,24 +29,30 @@ module.exports = function (gulp, plugins) {
                 return filename.match(/screenshot.+\.png$/) !== null;
             });
 
-            var uploadDone = plugins._.after(screenshots.length, function () {
+            var clearAndDone = function () {
                 plugins.utils.clean_env();
                 done();
             });
 
-            var tag = [
-                plugins.moment().format("YYYY-MM-DD"), 
-                plugins.path.basename(process.cwd()),
-                process.env.TRAVIS_COMMIT, 
-                process.env.PLATFORM].join('/'); 
+            if (screenshots.length === 0) {
+                clearAndDone(); 
+            } else {
+                var uploadDone = plugins._.after(screenshots.length, clearAndDone);
 
-            plugins._.each(screenshots, function (screenshot) {
-                plugins.cloudinary.uploader.upload(plugins.path.join(screenshotsPath, screenshot), function(result) {
-                    plugins.utils.log('Uploading ' + screenshot + '...');
-    		            plugins.utils.log(result.url);
-    		            uploadDone();
-                }, { folder: tag, use_filename: true });
-            });
+                var tag = [
+                    plugins.path.basename(process.cwd()),
+                    plugins.moment().format("YYYY-MM-DD"), 
+                    process.env.TRAVIS_COMMIT, 
+                    process.env.PLATFORM].join('/'); 
+
+                plugins._.each(screenshots, function (screenshot) {
+                    plugins.cloudinary.uploader.upload(plugins.path.join(screenshotsPath, screenshot), function(result) {
+                        plugins.utils.log('Uploading ' + screenshot + '...');
+                            plugins.utils.log(result.url);
+                            uploadDone();
+                    }, { folder: tag, use_filename: true });
+                });
+            }
         });
     });
 };
