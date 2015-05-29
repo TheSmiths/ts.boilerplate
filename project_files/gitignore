@@ -1,4 +1,6 @@
 # Created by https://www.gitignore.io
+Resources/
+.DS_Store
 
 ### Emacs ###
 # -*- mode: gitignore; -*-
