@@ -200,7 +200,7 @@ target/
 
 ### Ruby ###
 *.gem
-!component_files/jsduck*.gem
+!component_files/doc/jsduck*.gem
 *.rbc
 /.config
 /coverage/
