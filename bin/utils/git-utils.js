@@ -24,29 +24,42 @@ module.exports = {
         gulp.src(files).pipe(git.add(addArgs));
 
         /* Use to check if files have been commited. Failed after nb temptative */
-        var checkIfCommited = function (nb, max) {
-            if (nb > max) { return callback("Timeout; error during commit."); }
+        setTimeout(module.exports.checkIfAdded, 1000 * 5, 1, 5, function () {
+            /* Use to check if files have been added. Failed after nb temptative */
             git.status({maxBuffer: Infinity}, function (err, stdout) {
-                /* We consider git-status output to do so*/
-                if (stdout.match(/nothing to commit/) !== null) { return callback(); }
-                setTimeout(checkIfCommited, 1000 * 5, nb + 1, max);
-            });
-        };
+                if (stdout.match(/nothing to commit/)) { return callback(); }
 
-        /* Use to check if files have been added. Failed after nb temptative */
-        var checkIfAdded = function (nb, max) {
-            if (nb > max) { return callback("Timeout; error during add."); }
-            git.status({maxBuffer: Infinity}, function (err, stdout) {
-                if (stdout.match(/Untracked files/) === null) {
-                    gulp.src(files).pipe(git.commit(msg, {maxBuffer: Infinity}));
-                    setTimeout(checkIfCommited, 1000 * 5, 1, 5);
-                } else {
-                    setTimeout(checkIfAdded, 1000 * 5, nb + 1, max);
-                }
-            });   
-        };
-        
-        /* Just start the verification / ensuring process */
-        setTimeout(checkIfAdded, 1000 * 5, 1, 5);
+                gulp.src(files).pipe(git.commit(msg, {maxBuffer: Infinity}));
+                setTimeout(module.exports.checkIfCommited, 1000 * 5, 1, 5, callback);
+            });
+        });
+    },
+
+    /*
+     * @method checkIfCommited 
+     * Ensure that there is no pending or untracked files in the branch
+     * @param nb The nbth try to read the git status
+     * @param max Number of try before assuming it's failed
+     * @param callback The callback to call on error or success.
+     */
+    checkIfCommited: function self (nb, max, callback) {
+        git.status({maxBuffer: Infinity}, function (err, stdout) {
+            /* We consider git-status output to do so*/
+            if (stdout.match(/nothing to commit/) !== null) { return callback(); }
+            if (++nb > max) { return callback("Timeout; error during commit."); }
+            setTimeout(self, 1000 * 5, nb, max, callback);
+        });
+    },
+
+    /* 
+     * @method checkIfAdded
+     * @see checkIfCommited and do a little of abstraction with your mind.
+     */
+    checkIfAdded: function self (nb, max, callback) {
+        git.status({maxBuffer: Infinity}, function (err, stdout) {
+            if (stdout.match(/Untracked files/) === null) { return callback(); }
+            if (++nb > max) { return callback("Timeout; error during add."); }
+            setTimeout(self, 1000 * 5, nb, max, callback);
+        });   
     }
 };

@@ -27,7 +27,7 @@ var types = {1:'library', 2:'widget', 3:'module', 4:'project'},
     reTypes = new RegExp("^(" + _.flatten(_.pairs(types)).join('|') + ")$"),
     reName = /^[\w\.-]+$/;
 
-/* Add the first (and only ?) command which bootstrap a component */
+/* Add the first command which bootstrap a component */
 commander
     .command('init')
     .description('Initialize a repository, test env and general structure for a component\'s dev.')
@@ -36,11 +36,19 @@ commander
     .action(init)
     .on('--help', helpInit); /* Add a custom help for the init command */
 
+/* Add an update command to easily update boilerplate resources inside a project */
+commander
+    .command('update')
+    .description('Update an existing repository with new version of the boilerplate tasks runner')
+    .action(update)
+    .on('--help', helpUpdate);
+
+process.argv.length === 2 && process.argv.push("--help");
 commander.parse(process.argv); /* At the end, parse the command */
 
 /* Very basic error handler */
 function handleError (err) {
-    console.log(utils.colors.red("Error: " + (err.message || err)));
+    console.log(utils.colors.bold.red("\nError: " + (err.message || err)));
     process.exit(1);
 }
 
@@ -154,7 +162,7 @@ function proceedInit(options) {
                     tasks.masterBranch.checkout,
                 ], function (err) {
                     if (err) { return handleError(err); }
-                    utils.log(utils.colors.bold.cyan("Sounds like you're ready to start :)"));
+                    utils.log(utils.colors.bold.cyan("\nSounds like you're ready to start :)"));
                 }
             );
             break;
@@ -173,7 +181,7 @@ function proceedInit(options) {
                     tasks.masterBranch.addAndCommit,
                 ], function (err) {
                     if (err) { return handleError(err); }
-                    utils.log(utils.colors.bold.cyan("Sounds like you're ready to start :)"));
+                    console.log(utils.colors.bold.cyan("Sounds like you're ready to start :)"));
                 }
             );
             break;
@@ -181,4 +189,58 @@ function proceedInit(options) {
         /* For the moment, we don't mind about module */
         default: handleError("Module not implemented yet. Sorry :/");
     }
+}
+
+/* New command: update; This will update an existing repository with new and fresh files 
+ * from the boilerplate. Therefore, if there is any changes in the gulpfiles, they will 
+ * be impacted on the current project */
+
+
+function helpUpdate () {
+    console.log("The update command should be use at the root of your Titanium project."+
+        "\nBe sure to have all your branches clean before running it, as it will switch"+
+        "to the test branch and the doc branch to update the .gulp folder."
+    );
+}
+
+function update () {
+    prompt.start();
+
+    /* Warn the user that the command is gonna erase and replace the exsiting .gulp folder */
+    console.log(utils.colors.bold.yellow("This will erase and replace existing gulpfiles."));
+    prompt.get({
+        message:  utils.colors.bold.white("Shall we proceed [y|N]? "),
+    }, function(err, result) {
+        if (err) { handleError(err); } 
+        if (result.question.match(/y(es)?/i)) {
+            proceedUpdate();
+        }
+    });
+}
+
+/* Try to update the current project */
+function proceedUpdate () {
+        var options = {
+                root: path.join(__dirname, '..'),
+                processRoot: process.cwd(),
+                updated: []
+            }, 
+            updateWorker = require('./tasks/update.js')(options);
+
+    utils.log("Starting updating procedure...");
+
+    async.series([
+        updateWorker.ensureGitStatus,
+        updateWorker.updateTestBranch,
+        updateWorker.updateDocBranch,
+        updateWorker.updateMasterBranch,
+    ], function (err) {
+        if (err && err !== "skipped") { return handleError(err); }
+
+        if (options.updated.length !== 0) {
+            console.log(utils.colors.bold.cyan("\nYour project has been successfully updated."));
+        } else {
+            handleError("Unable to update your project");
+        }
+    });
 }
