@@ -105,7 +105,7 @@ behavior on this platform.
 
 ### Command Line Interface
 
-*init*
+**init**  
 To start a new project, you can now use : `ts-boilerplate init` which will ask you the *name* and
 the *type* of project you want to setup.
 Both information might be supplied as options : 
@@ -116,7 +116,7 @@ At the root of a **doc** or **test** branch, you may find a `gulpfile`. Just use
 to display available tasks. Every project has also a similar file that allow you to build or launch
 tests. 
 
-*update*
+**update**  
 Because the project is still moving and experimenting things; The diffirent tasks available with gulp are likely to evolve; We might also add new ones. Using `ts-boilerplate update` inside an existing project will update all gulpfiles of every branch. So, the boilerplate could be update via `npm update` and you could then refresh your project files with the updated one using the `update` command of the boilerplate!
 
 
