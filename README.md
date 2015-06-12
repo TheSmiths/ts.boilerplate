@@ -73,12 +73,14 @@ Our builds are splitted in two kinds - *android* and *ios* - and are made on a *
 machine*. Different SDK versions, simulators or emulators might be supplied, everything is working
 the same way.
 
-
 ## Documentation
 As every module and API shall be documented, that's why we've also integrated our forked version of
 [JsDuck](https://github.com/ktorz/jsduck). With this tools, we can easily build powerful
 documentation resources directly from the source code. Also, all these documentations can be
 published to an external hosting service such as *gh-pages*.
+
+## Exporting Results
+As I write those lines, there is only one kind of export available after a build (or a set of travis task). Any screenshot made with Calabash (yes, Calabash offer you to query devices and emulator with mobile gestures; Doing a screenshot is one of them) could be exported to an external cloud storage. For this, we rely on [cloudinary](http://cloudinary.com/) which provides a great API to achieve such a goal. The travis console is also writing down a lot of output from either builds or test runners. It might be great to find a way to export all of them in order to generate consistent reports after each build.
 
 ## ts-boilerplate
 Finally, we come up about the tool. The main purpose of this module is to grab and setup an
@@ -102,7 +104,9 @@ By the by, nothing has been tested on *Windows* and the module would probably le
 behavior on this platform. 
 
 ### Command Line Interface
-To start a new project, you can now use : 'ts-boilerplate init' which will ask you the *name* and
+
+*init*
+To start a new project, you can now use : `ts-boilerplate init` which will ask you the *name* and
 the *type* of project you want to setup.
 Both information might be supplied as options : 
 - `--name |  -n    <nameOfYourComponent>`
@@ -111,6 +115,9 @@ Both information might be supplied as options :
 At the root of a **doc** or **test** branch, you may find a `gulpfile`. Just use the `gulp` command
 to display available tasks. Every project has also a similar file that allow you to build or launch
 tests. 
+
+*update*
+Because the project is still moving and experimenting things; The diffirent tasks available with gulp are likely to evolve; We might also add new ones. Using `ts-boilerplate update` inside an existing project will update all gulpfiles of every branch. So, the boilerplate could be update via `npm update` and you could then refresh your project files with the updated one using the `update` command of the boilerplate!
 
 
 
